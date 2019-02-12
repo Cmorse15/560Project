@@ -40,11 +40,11 @@ def getDonorData(name):
 
 
 def getOrganizationData(nameList):
-    df = pd.DataFrame(columns=['2008:', '2009:', '2010:', '2011:', '2012:', '2013:', '2014:', '2015:', '2016:', '2017:', '2018:', 'Total:'], index = nameList).fillna(0)
+    df = pd.DataFrame(columns=['2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', 'Total'], index = nameList)#.fillna(0)
     for org in nameList:
         donorData = getDonorData(org)
         for i in range(0, len(donorData), 2):
-            df.at[org, donorData[i]] = float(donorData[i+1].replace(",","").replace(" ","").replace("$",""))
+            df.at[org, donorData[i].replace(":","")] = float(donorData[i+1].replace(",","").replace(" ","").replace("$",""))
     return df
 
 
