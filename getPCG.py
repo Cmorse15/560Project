@@ -32,17 +32,20 @@ def getDonorData(name):
     url = 'https://www.pickclickgive.org/index.cfm/pfdorgs.info/' + name.replace(" ", "-")
     resp = requests.get(url)
     htmlString = html.fromstring(resp.content)
+    EIN = htmlString.xpath('//div[h4[text() = "EIN"]]//text() ')
+    EIN = EIN[2].strip()
     data = htmlString.xpath('//div[h4[text() = "Past Contributions"]]//text()')
     data = data[2:] #remove the first three things from list they are formatting
     del data[::3] #remove more formatting
-    return data #in form ["2010", ' $1300']
+    return EIN, data #in form ["2010", ' $1300']
 
 
 
 def getOrganizationData(nameList):
-    df = pd.DataFrame(columns=['2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', 'Total'], index = nameList)#.fillna(0)
+    df = pd.DataFrame(columns=['EIN', '2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', 'Total'], index = nameList)#.fillna(0)
     for org in nameList:
-        donorData = getDonorData(org)
+        EIN, donorData = getDonorData(org)
+        df.at[org, 'EIN'] = EIN
         for i in range(0, len(donorData), 2):
             df.at[org, donorData[i].replace(":","")] = float(donorData[i+1].replace(",","").replace(" ","").replace("$",""))
     return df
@@ -51,9 +54,8 @@ def getOrganizationData(nameList):
 def main():
     nameList = getAllOrganizationNames()
     df = getOrganizationData(nameList)
-    newFile = open('PCG_Donor_Data.csv', "w+")
+    newFile = open('PCG_Donor_Data2.csv', "w+")
     newFile.write(df.to_csv())
-
 
 
 if __name__ == "__main__":
